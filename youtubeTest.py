@@ -1,5 +1,6 @@
 from moviepy.editor import *
 from pytube import YouTube
+from pytube import Playlist
 
 import re
 import os
@@ -15,7 +16,15 @@ fileToRead = open("songs.txt", "r")
 thislist = []
 
 for link in fileToRead:
-    thislist.append(video_object(link.strip("/n")))
+    link = link.strip("/n")
+    # If the string  "playlist" is in the link, will add each url in the playlist to thisList
+    if "playlist" in link:
+        pList = Playlist(link)
+        for url in pList:
+            thislist.append(video_object(url))
+    # Else, treats URL as normal video URL
+    else:
+        thislist.append(video_object(link))
 
 
 while(len(thislist) > 0):
