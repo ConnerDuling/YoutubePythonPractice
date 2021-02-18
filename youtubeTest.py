@@ -26,53 +26,61 @@ for link in fileToRead:
     else:
         thislist.append(video_object(link))
 
-
-while(len(thislist) > 0):
-
-    for video in thislist:
-        #This section gets the video from the link, and downloads a MP4 of it.
-        try:
-            print("\nLink processing: "+video.url)
-            yVideo = YouTube(video.url)
-
-            print("Title is: ", yVideo.title, "\nLength (Min):", "{:10.2f}".format(yVideo.length / 60) ,"\nViews: ", yVideo.views, "\nRatings: ", yVideo.rating)
-            videoStream = yVideo.streams.get_highest_resolution()
-
-            fileToBeRenamed = videoStream.download()
+fileToRead.close()
 
 
-            #Reformats name and removes spacing from video title to use as file name
-            newName = str(videoStream.title).replace('/',"")
-            nameComponents = newName.split()
-            for i in nameComponents:
-                i = i.capitalize()
-            seperator = ''
-            newName = seperator.join(nameComponents)
-
-           
-
-            newName.replace(':',"-")
-
-            print(newName)
-
-            
-            mp4_file = fileToBeRenamed
-            mp3_file = 'finishedSongs/'+newName+'.mp3'
-
-            videoclip = VideoFileClip(mp4_file)
-            audioclip = videoclip.audio
-            audioclip.write_audiofile(mp3_file)
-            audioclip.close()
-            videoclip.close()
-
-            os.remove(fileToBeRenamed)
+fileOfError = open("errors.txt", "w")
+errorCount = 0
 
 
-            thislist.remove(video)
-            print("There is",len(thislist),"video(s) left in the que.")
+for video in thislist:
+    #This section gets the video from the link, and downloads a MP4 of it.
+    try:
+        print("\nLink processing: "+video.url)
+        yVideo = YouTube(video.url)
 
-        except Exception:
-            print("\nException. Waiting ")
-            time.sleep(5)
+        print("Title is: ", yVideo.title, "\nLength (Min):", "{:10.2f}".format(yVideo.length / 60) ,"\nViews: ", yVideo.views, "\nRatings: ", yVideo.rating)
+        videoStream = yVideo.streams.get_highest_resolution()
 
-print("All done!")
+        fileToBeRenamed = videoStream.download()
+
+
+        #Reformats name and removes spacing from video title to use as file name
+        newName = str(videoStream.title).replace('/',"")
+        nameComponents = newName.split()
+        for i in nameComponents:
+            i = i.capitalize()
+        seperator = ''
+        newName = seperator.join(nameComponents)           
+
+        newName.replace(':',"-")
+        newName.replace(',',"_")
+
+        print(newName)
+
+        
+        mp4_file = fileToBeRenamed
+        mp3_file = 'finishedSongs/'+newName+'.mp3'
+
+        videoclip = VideoFileClip(mp4_file)
+        audioclip = videoclip.audio
+        audioclip.write_audiofile(mp3_file)
+        audioclip.close()
+        videoclip.close()
+
+        os.remove(fileToBeRenamed)
+
+    except Exception:
+        print("\nException occured. Logging bad video.")
+
+        fileOfError.write(YouTube(video.url).title+" had an error\n")
+
+    
+    thislist.remove(video)
+
+
+    print("There is",len(thislist),"video(s) left in the queue.")
+    time.sleep(1)
+
+fileOfError.close()
+print("Process Completed.")
