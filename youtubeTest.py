@@ -53,8 +53,12 @@ for video in thislist:
         seperator = ''
         newName = seperator.join(nameComponents)           
 
-        newName.replace(':',"-")
-        newName.replace(',',"_")
+        # illegal characters to avoid in finished filenames
+        bad_chars = [';','.','\'', ':','?', '!', '*','\\','/','#','&','%','#','{','}','>','<',' ',';','@']
+        
+        # using filter() to
+        # remove bad_chars
+        newName = ''.join((filter(lambda i: i not in bad_chars, newName)))
 
         print(newName)
 
@@ -80,7 +84,7 @@ for video in thislist:
 
 
     print("There is",len(thislist),"video(s) left in the queue.")
-    time.sleep(1)
+    time.sleep(3)
 
 fileOfError.close()
 print("Process Completed.")
