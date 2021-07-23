@@ -1,10 +1,15 @@
 from moviepy.editor import *
 from pytube import YouTube
 from pytube import Playlist
+import requests
 
 import re
 import os
 import time
+
+# Sometime, the pypi release becomes slightly outdated. To install from the source with pip:
+
+# $ python -m pip install git+https://github.com/pytube/pytube
 
 class video_object():
     def __init__(self, url):
@@ -47,6 +52,10 @@ for video in thislist:
 
         #Reformats name and removes spacing from video title to use as file name
         newName = str(videoStream.title).replace('/',"")
+
+        string_encode = newName.encode("ascii", "ignore")
+        newName = string_encode.decode()
+
         nameComponents = newName.split()
         for i in nameComponents:
             i = i.capitalize()
@@ -84,7 +93,7 @@ for video in thislist:
 
 
     print("There is",len(thislist),"video(s) left in the queue.")
-    time.sleep(3)
+    time.sleep(1)
 
 fileOfError.close()
 print("Process Completed.")
