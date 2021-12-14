@@ -47,8 +47,7 @@ for video in thislist:
         print("Title is: ", yVideo.title, "\nLength (Min):", "{:10.2f}".format(yVideo.length / 60) ,"\nViews: ", yVideo.views, "\nRatings: ", yVideo.rating)
         videoStream = yVideo.streams.get_highest_resolution()
 
-        fileToBeRenamed = videoStream.download()
-
+        fileToBeRenamed = videoStream.download(filename='tempfile')
 
         #Reformats name and removes spacing from video title to use as file name
         newName = str(videoStream.title).replace('/',"")
@@ -63,7 +62,7 @@ for video in thislist:
         newName = seperator.join(nameComponents)           
 
         # illegal characters to avoid in finished filenames
-        bad_chars = [';','.','\'', ':','?', '!', '*','\\','/','#','&','%','#','{','}','>','<',' ',';','@']
+        bad_chars = [';','.','\'', ':','?', '!', '*','\\','/','#','&','%','#','{','}','>','<',' ',';','@',')','(']
         
         # using filter() to
         # remove bad_chars
@@ -93,7 +92,7 @@ for video in thislist:
 
 
     print("There is",len(thislist),"video(s) left in the queue.")
-    time.sleep(1)
+    time.sleep(1.5)
 
 fileOfError.close()
 print("Process Completed.")
