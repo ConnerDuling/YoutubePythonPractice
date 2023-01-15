@@ -33,25 +33,25 @@ for link in fileToRead:
 
 fileToRead.close()
 
-
 fileOfError = open("errors.txt", "w")
 errorCount = 0
-
+listCounter = len(thislist)
 
 for video in thislist:
-    #This section gets the video from the link, and downloads a MP4 of it.
     try:
+        #This section gets the video from the link, and downloads a MP4 of it.
         print("\nLink processing: "+video.url)
         yVideo = YouTube(video.url)
 
-        print("Title is: ", yVideo.title, "\nLength (Min):", "{:10.2f}".format(yVideo.length / 60) ,"\nViews: ", yVideo.views, "\nRatings: ", yVideo.rating)
+        print("Title:\t", yVideo.title,
+            "\nLength (Min):\t", "{:10.2f}".format(yVideo.length / 60) ,
+            "\nViews:\t", yVideo.views)
         videoStream = yVideo.streams.get_highest_resolution()
 
         fileToBeRenamed = videoStream.download(filename='tempfile')
 
         #Reformats name and removes spacing from video title to use as file name
         newName = str(videoStream.title).replace('/',"")
-
         string_encode = newName.encode("ascii", "ignore")
         newName = string_encode.decode()
 
@@ -62,14 +62,10 @@ for video in thislist:
         newName = seperator.join(nameComponents)           
 
         # illegal characters to avoid in finished filenames
-        bad_chars = [';','.','\'', ':','?', '!', '*','\\','/','#','&','%','#','{','}','>','<',' ',';','@',')','(']
+        bad_chars = [';','|','.','\'', ':','?', '!', '*','\\','/','#','&','%','#','{','}','>','<',' ',';','@',')','(']
         
-        # using filter() to
-        # remove bad_chars
+        # using filter() to remove bad_chars
         newName = ''.join((filter(lambda i: i not in bad_chars, newName)))
-
-        print(newName)
-
         
         mp4_file = fileToBeRenamed
         mp3_file = 'finishedSongs/'+newName+'.mp3'
@@ -82,17 +78,18 @@ for video in thislist:
 
         os.remove(fileToBeRenamed)
 
-    except Exception:
-        print("\nException occured. Logging bad video.")
+    except Exception as e:
+        print("\nException occured. Logging bad video.\n"+str(e))
 
-        fileOfError.write(YouTube(video.url).title+" had an error\n")
+        fileOfError.write(YouTube(video.url).title+" had an error\n"+
+        str(e)+"\n----------\n")
 
-    
-    thislist.remove(video)
-
-
-    print("There is",len(thislist),"video(s) left in the queue.")
-    time.sleep(1.5)
+    listCounter -= 1
+    if listCounter == 0:
+        print("List completed.")
+    else:
+        print("There is", listCounter, "video(s) left in the queue.")
+        time.sleep(2)
 
 fileOfError.close()
 print("Process Completed.")
