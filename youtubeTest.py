@@ -5,6 +5,7 @@ import requests
 
 import re
 import os
+import shutil
 import time
 
 # Sometime, the pypi release becomes slightly outdated. To install from the source with pip:
@@ -39,6 +40,7 @@ listCounter = len(thislist)
 
 for video in thislist:
     try:
+        isMp3 = True
         #This section gets the video from the link, and downloads a MP4 of it.
         print("\nLink processing: "+video.url)
         yVideo = YouTube(video.url)
@@ -68,14 +70,19 @@ for video in thislist:
         newName = ''.join((filter(lambda i: i not in bad_chars, newName)))
         
         mp4_file = fileToBeRenamed
-        mp3_file = 'finishedSongs/'+newName+'.mp3'
 
-        videoclip = VideoFileClip(mp4_file)
-        audioclip = videoclip.audio
-        audioclip.write_audiofile(mp3_file)
-        audioclip.close()
-        videoclip.close()
+        if isMp3: # If not MP3 there is no need to make MP3 version nor delete original MP4
+           
+            mp3_file = 'finishedSongs/'+newName+'.mp3'
 
+            videoclip = VideoFileClip(mp4_file)
+            audioclip = videoclip.audio
+            audioclip.write_audiofile(mp3_file)
+            audioclip.close()
+            videoclip.close()
+        else:
+            shutil.move(mp4_file, 'finishedSongs/'+newName+'.mp4')
+        
         os.remove(fileToBeRenamed)
 
     except Exception as e:
