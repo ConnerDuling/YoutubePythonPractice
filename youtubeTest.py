@@ -1,12 +1,22 @@
 from moviepy.editor import *
-from pytube import YouTube
-from pytube import Playlist
+from pytubefix import YouTube # New library using fix for pytube
+from pytubefix import Playlist
 import requests
 
 import re
 import os
 import shutil
 import time
+
+# # Temp fix for 400 error # 
+# from pytubefix. innertube import _default_clients
+
+# _default_clients[ "ANDROID"][ "context"]["client"]["clientVersion"] = "19.08.35"
+# _default_clients["IOS"]["context"]["client"]["clientVersion"] = "19.08.35"
+# _default_clients[ "ANDROID_EMBED"][ "context"][ "client"]["clientVersion"] = "19.08.35"
+# _default_clients[ "IOS_EMBED"][ "context"]["client"]["clientVersion"] = "19.08.35"
+# _default_clients["IOS_MUSIC"][ "context"]["client"]["clientVersion"] = "6.41"
+# _default_clients[ "ANDROID_MUSIC"] = _default_clients[ "ANDROID_CREATOR" ]
 
 # Sometime, the pypi release becomes slightly outdated. To install from the source with pip:
 
@@ -21,16 +31,25 @@ fileToRead = open("songs.txt", "r")
 
 thislist = []
 
-for link in fileToRead:
+for line in fileToRead:
+    lineArgs = line.split()
+    link = lineArgs[0]
+    isMP3 = (lineArgs[1] == "MP3")
     link = link.strip("/n")
     # If the string  "playlist" is in the link, will add each url in the playlist to thisList
     if "playlist" in link:
         pList = Playlist(link)
         for url in pList:
-            thislist.append(video_object(url))
+            thislist.append({
+                "videoObject": video_object(url),
+                "isMP3": isMP3
+                })
     # Else, treats URL as normal video URL
     else:
-        thislist.append(video_object(link))
+        thislist.append({
+            "videoObject": video_object(link),
+            "isMP3": isMP3
+            })
 
 fileToRead.close()
 
@@ -38,9 +57,10 @@ fileOfError = open("errors.txt", "w")
 errorCount = 0
 listCounter = len(thislist)
 
-for video in thislist:
+for videoConfig in thislist:
     try:
-        isMp3 = True
+        isMp3 = videoConfig["isMP3"]
+        video = videoConfig["videoObject"]
         #This section gets the video from the link, and downloads a MP4 of it.
         print("\nLink processing: "+video.url)
         yVideo = YouTube(video.url)
@@ -62,9 +82,8 @@ for video in thislist:
             i = i.capitalize()
         seperator = ''
         newName = seperator.join(nameComponents)           
-
         # illegal characters to avoid in finished filenames
-        bad_chars = [';','|','.','\'', ':','?', '!', '*','\\','/','#','&','%','#','{','}','>','<',' ',';','@',')','(']
+        bad_chars = [';','|','.','\'', ':','?', '!', '*','\\','/','"','#','&','%','#','{','}','>','<',' ',';','@',')','(']
         
         # using filter() to remove bad_chars
         newName = ''.join((filter(lambda i: i not in bad_chars, newName)))
@@ -80,10 +99,9 @@ for video in thislist:
             audioclip.write_audiofile(mp3_file)
             audioclip.close()
             videoclip.close()
+            os.remove(fileToBeRenamed)
         else:
             shutil.move(mp4_file, 'finishedSongs/'+newName+'.mp4')
-        
-        os.remove(fileToBeRenamed)
 
     except Exception as e:
         print("\nException occured. Logging bad video.\n"+str(e))
@@ -96,7 +114,7 @@ for video in thislist:
         print("List completed.")
     else:
         print("There is", listCounter, "video(s) left in the queue.")
-        time.sleep(2)
+        time.sleep(5)
 
 fileOfError.close()
 print("Process Completed.")
