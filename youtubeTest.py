@@ -34,7 +34,7 @@ thislist = []
 for line in fileToRead:
     lineArgs = line.split()
     link = lineArgs[0]
-    isMP3 = (lineArgs[1] == "MP3")
+    isMP3 = (lineArgs[1].upper() == "MP3")
     link = link.strip("/n")
     # If the string  "playlist" is in the link, will add each url in the playlist to thisList
     if "playlist" in link:
